@@ -1,0 +1,75 @@
+﻿@page "/stations/{number:int}"
+
+@using fs_2025_assessment_1_74491.BlazorApp.Models
+@using fs_2025_assessment_1_74491.BlazorApp.Services
+
+@inject StationsApiClient Api
+
+<h3>Station Details</h3>
+
+@if (station == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div>
+        <h4>@station.name (@station.number)</h4>
+        <p>@station.address</p>
+
+        <table class="table">
+            <tbody>
+                <tr>
+                    <th>Contract</th>
+                    <td>@station.contract_name</td>
+                </tr>
+                <tr>
+                    <th>Status</th>
+                    <td>@station.status</td>
+                </tr>
+                <tr>
+                    <th>Total Stands</th>
+                    <td>@station.bike_stands</td>
+                </tr>
+                <tr>
+                    <th>Available Bikes</th>
+                    <td>@station.available_bikes</td>
+                </tr>
+                <tr>
+                    <th>Available Stands</th>
+                    <td>@station.available_bike_stands</td>
+                </tr>
+                <tr>
+                    <th>Occupancy</th>
+                    <td>@station.occupancy</td>
+                </tr>
+                <tr>
+                    <th>Last Update (Local)</th>
+                    <td>@station.last_update_local</td>
+                </tr>
+                <tr>
+                    <th>Last Update (UTC)</th>
+                    <td>@station.last_update_utc</td>
+                </tr>
+                <tr>
+                    <th>Latitude</th>
+                    <td>@station.position?.lat</td>
+                </tr>
+                <tr>
+                    <th>Longitude</th>
+                    <td>@station.position?.lng</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    [Parameter] public int number { get; set; }
+    StationDto? station;
+
+    protected override async Task OnInitializedAsync()
+    {
+        station = await Api.GetStationAsync(number);
+    }
+}

@@ -1,0 +1,165 @@
+﻿@page "/stations"
+
+@inject Services.StationsApiClient Api
+
+<h3>Stations</h3>
+
+<div class="mb-3">
+    <div class="row g-2">
+        <div class="col-md-3">
+            <input class="form-control"
+                   placeholder="Search name or address"
+                   @bind="searchTerm" />
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" @bind="statusFilter">
+                <option value="">All statuses</option>
+                <option value="OPEN">Open</option>
+                <option value="CLOSED">Closed</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <input type="number"
+                   class="form-control"
+                   placeholder="Min bikes"
+                   @bind="minBikes" />
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" @bind="sortBy">
+                <option value="">Sort by name</option>
+                <option value="availableBikes">Available bikes</option>
+                <option value="bikeStands">Bike stands</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" @bind="sortDir">
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+            </select>
+        </div>
+        <div class="col-md-1 d-grid">
+            <button class="btn btn-primary" @onclick="ApplyFilters">Apply</button>
+        </div>
+    </div>
+</div>
+
+@if (isLoading)
+{
+    <p>Loading...</p>
+}
+else if (stations == null || stations.Count == 0)
+{
+    <p>No stations found.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Number</th>
+                <th>Name</th>
+                <th>Address</th>
+                <th>Bikes</th>
+                <th>Stands</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var s in stations)
+        {
+            <tr>
+                <td>@s.number</td>
+                <td>
+                    <a href="/stations/@s.number">@s.name</a>
+                </td>
+                <td>@s.address</td>
+                <td>@s.available_bikes</td>
+                <td>@s.bike_stands</td>
+                <td>@s.status</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <button class="btn btn-outline-secondary me-2"
+                    disabled="@(!CanGoPrevious)"
+                    @onclick="PreviousPage">
+                Previous
+            </button>
+            <button class="btn btn-outline-secondary"
+                    disabled="@(!CanGoNext)"
+                    @onclick="NextPage">
+                Next
+            </button>
+        </div>
+        <div>
+            Page @page
+        </div>
+    </div>
+}
+
+@code {
+    List<Models.StationDto>? stations;
+    bool isLoading;
+
+    string? statusFilter;
+    int? minBikes;
+    string? searchTerm;
+    string? sortBy;
+    string sortDir = "asc";
+
+    int page = 1;
+    int pageSize = 20;
+
+    bool CanGoPrevious => page > 1;
+    bool CanGoNext => stations != null && stations.Count == pageSize;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadStationsAsync();
+    }
+
+    async Task LoadStationsAsync()
+    {
+        isLoading = true;
+        StateHasChanged();
+
+        stations = await Api.GetStationsAsync(
+            status: statusFilter,
+            minBikes: minBikes,
+            search: searchTerm,
+            sortBy: sortBy,
+            sortDir: sortDir,
+            page: page,
+            pageSize: pageSize);
+
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    async Task ApplyFilters()
+    {
+        page = 1;
+        await LoadStationsAsync();
+    }
+
+    async Task NextPage()
+    {
+        if (!CanGoNext)
+            return;
+
+        page++;
+        await LoadStationsAsync();
+    }
+
+    async Task PreviousPage()
+    {
+        if (!CanGoPrevious)
+            return;
+
+        page--;
+        await LoadStationsAsync();
+    }
+}

@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36518.9 d17.14
+VisualStudioVersion = 17.14.36518.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fs-2025-assessment-1-74491", "fs-2025-assessment-1-74491\fs-2025-assessment-1-74491.csproj", "{C56E39CC-EA45-45B4-9C31-FD5871B5B1D8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fs_2025_assessment_1_74491.Tests", "fs_2025_assessment_1_74491.Tests\fs_2025_assessment_1_74491.Tests.csproj", "{588C11A3-3843-4141-A754-4EC791B4B8EA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fs-2025-assessment-1-74491.BlazorApp", "fs-2025-assessment-1-74491.BlazorApp\fs-2025-assessment-1-74491.BlazorApp.csproj", "{57E150A6-6C22-414F-8047-C18B65DB5AC8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{C56E39CC-EA45-45B4-9C31-FD5871B5B1D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C56E39CC-EA45-45B4-9C31-FD5871B5B1D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C56E39CC-EA45-45B4-9C31-FD5871B5B1D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{588C11A3-3843-4141-A754-4EC791B4B8EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{588C11A3-3843-4141-A754-4EC791B4B8EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{588C11A3-3843-4141-A754-4EC791B4B8EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{588C11A3-3843-4141-A754-4EC791B4B8EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57E150A6-6C22-414F-8047-C18B65DB5AC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57E150A6-6C22-414F-8047-C18B65DB5AC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57E150A6-6C22-414F-8047-C18B65DB5AC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57E150A6-6C22-414F-8047-C18B65DB5AC8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
