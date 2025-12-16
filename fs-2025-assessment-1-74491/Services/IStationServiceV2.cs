@@ -16,5 +16,6 @@ public interface IStationServiceV2
     Task<Station?> GetStationByNumberAsync(int number);
     Task<Station> AddStationAsync(Station station);
     Task<Station?> UpdateStationAsync(int number, Station updatedStation);
+    Task<bool> DeleteStationAsync(int number);
     Task<StationSummary> GetSummaryAsync();
 }

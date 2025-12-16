@@ -1,10 +1,4 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-
-namespace fs_2025_assessment_1_74491.Services;
+﻿namespace fs_2025_assessment_1_74491.Services;
 
 public class StationUpdateBackgroundService : BackgroundService
 {

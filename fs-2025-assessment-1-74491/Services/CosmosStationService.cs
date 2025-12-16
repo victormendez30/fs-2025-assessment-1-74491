@@ -2,8 +2,6 @@
 using System.Text.Json;
 using Microsoft.Azure.Cosmos;
 using fs_2025_assessment_1_74491.Models;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 
 namespace fs_2025_assessment_1_74491.Services;
 
@@ -231,4 +229,23 @@ public class CosmosStationService : IStationServiceV2
         var response = await _container.UpsertItemAsync(existing, new PartitionKey(existing.number));
         return response.Resource;
     }
+
+    public async Task<bool> DeleteStationAsync(int number)
+    {
+        try
+        {
+            var response = await _container.DeleteItemAsync<Station>(
+                number.ToString(),
+                new PartitionKey(number));
+
+            return response.StatusCode == HttpStatusCode.NoContent
+                   || response.StatusCode == HttpStatusCode.OK;
+        }
+        catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+        {
+            return false;
+        }
+    }
 }
+
+

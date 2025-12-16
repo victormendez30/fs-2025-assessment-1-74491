@@ -101,5 +101,15 @@ public static class StationEndPointsV2
                 return Results.BadRequest(ex.Message);
             }
         });
+        v2.MapDelete("/{number:int}", async (
+    IStationServiceV2 stationService,
+    int number) =>
+        {
+            var deleted = await stationService.DeleteStationAsync(number);
+            return deleted ? Results.NoContent() : Results.NotFound();
+        });
     }
 }
+
+    
+

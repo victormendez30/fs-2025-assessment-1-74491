@@ -1,75 +1,287 @@
 ﻿@page "/stations/{number:int}"
+@rendermode InteractiveServer
 
 @using fs_2025_assessment_1_74491.BlazorApp.Models
 @using fs_2025_assessment_1_74491.BlazorApp.Services
 
 @inject StationsApiClient Api
+@inject NavigationManager Nav
+@inject IJSRuntime JS
 
 <h3>Station Details</h3>
 
-@if (station == null)
+@if (isLoading)
 {
     <p>Loading...</p>
 }
+else if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMessage
+    </div>
+}
+else if (station == null)
+{
+    <p>Station not found.</p>
+}
 else
 {
-    <div>
-        <h4>@station.name (@station.number)</h4>
-        <p>@station.address</p>
+    <div class="mb-3 d-flex justify-content-between align-items-center">
+        <a class="btn btn-link p-0" href="/stations">← Back to stations</a>
 
-        <table class="table">
-            <tbody>
-                <tr>
-                    <th>Contract</th>
-                    <td>@station.contract_name</td>
-                </tr>
-                <tr>
-                    <th>Status</th>
-                    <td>@station.status</td>
-                </tr>
-                <tr>
-                    <th>Total Stands</th>
-                    <td>@station.bike_stands</td>
-                </tr>
-                <tr>
-                    <th>Available Bikes</th>
-                    <td>@station.available_bikes</td>
-                </tr>
-                <tr>
-                    <th>Available Stands</th>
-                    <td>@station.available_bike_stands</td>
-                </tr>
-                <tr>
-                    <th>Occupancy</th>
-                    <td>@station.occupancy</td>
-                </tr>
-                <tr>
-                    <th>Last Update (Local)</th>
-                    <td>@station.last_update_local</td>
-                </tr>
-                <tr>
-                    <th>Last Update (UTC)</th>
-                    <td>@station.last_update_utc</td>
-                </tr>
-                <tr>
-                    <th>Latitude</th>
-                    <td>@station.position?.lat</td>
-                </tr>
-                <tr>
-                    <th>Longitude</th>
-                    <td>@station.position?.lng</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="d-flex align-items-center gap-2">
+            <a class="btn btn-outline-secondary btn-sm"
+               href="/stations/@number/edit">
+                Edit station
+            </a>
+
+            @if (!string.IsNullOrEmpty(deleteError))
+            {
+                <span class="text-danger me-2">@deleteError</span>
+            }
+            <button class="btn btn-outline-danger btn-sm"
+                    disabled="@isDeleting"
+                    @onclick="OnDeleteClicked">
+                @(isDeleting ? "Deleting..." : "Delete station")
+            </button>
+        </div>
+    </div>
+
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                    <h4 class="card-title mb-1">@station.name (@station.number)</h4>
+                    <p class="card-subtitle text-body-secondary mb-1">@station.address</p>
+                    <p class="mb-0">Contract: @station.contract_name</p>
+                </div>
+                <div class="text-end">
+                    <span class="@StatusBadgeClass" aria-label="Station status">
+                        @StatusText
+                    </span>
+                    <div class="mt-2 small">
+                        Last update: @LastUpdateDisplay
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <table class="table table-sm mb-0">
+                        <tbody>
+                            <tr>
+                                <th scope="row">Total stands</th>
+                                <td>@station.bike_stands</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Available bikes</th>
+                                <td>@station.available_bikes</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Available stands</th>
+                                <td>@station.available_bike_stands</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-2 d-flex justify-content-between align-items-center">
+                        <span>Occupancy</span>
+                        <span class="fw-semibold">
+                            @Math.Round(OccupancyPercent)%
+                            (@station.available_bikes / @station.bike_stands)
+                        </span>
+                    </div>
+                    <div class="progress" role="img" aria-label="@($"Bike occupancy {Math.Round(OccupancyPercent)} percent")">
+                        <div class="progress-bar"
+                             role="progressbar"
+                             style="width:@OccupancyPercent.ToString("0")%"
+                             aria-valuenow="@Math.Round(OccupancyPercent)"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3 mt-3">
+                <div class="col-md-6">
+                    <h5 class="h6">Location</h5>
+                    <table class="table table-sm mb-0">
+                        <tbody>
+                            <tr>
+                                <th scope="row">Latitude</th>
+                                <td>@station.position?.lat</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Longitude</th>
+                                <td>@station.position?.lng</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    @if (station.position != null)
+                    {
+                        var lat = station.position.lat;
+                        var lng = station.position.lng;
+
+                        <div class="mt-2">
+                            <a class="btn btn-sm btn-outline-secondary"
+                               href="@($"https://www.google.com/maps/search/?api=1&query={lat},{lng}")"
+                               target="_blank"
+                               rel="noopener noreferrer">
+                                Open in map
+                            </a>
+                        </div>
+                    }
+                </div>
+
+                <div class="col-md-6">
+                    <h5 class="h6">Timestamps</h5>
+                    <table class="table table-sm mb-0">
+                        <tbody>
+                            <tr>
+                                <th scope="row">Last update (Dublin)</th>
+                                <td>@station.last_update_local</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Last update (UTC)</th>
+                                <td>@station.last_update_utc</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Epoch (ms)</th>
+                                <td>@station.last_update</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
     </div>
 }
 
 @code {
     [Parameter] public int number { get; set; }
+
     StationDto? station;
+    bool isLoading;
+    string? errorMessage;
+
+    bool isDeleting;
+    string? deleteError;
 
     protected override async Task OnInitializedAsync()
     {
-        station = await Api.GetStationAsync(number);
+        await LoadStationAsync();
+    }
+
+    async Task LoadStationAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            station = await Api.GetStationAsync(number);
+        }
+        catch
+        {
+            errorMessage = "Unable to load station details right now. Please try again.";
+            station = null;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    async Task OnDeleteClicked()
+    {
+        if (station == null)
+            return;
+
+        var confirmed = await JS.InvokeAsync<bool>("confirm", $"Are you sure you want to delete station {station.name} ({station.number})?");
+        if (!confirmed)
+            return;
+
+        isDeleting = true;
+        deleteError = null;
+
+        try
+        {
+            var success = await Api.DeleteStationAsync(station.number);
+            if (!success)
+            {
+                deleteError = "Station not found or already deleted.";
+                isDeleting = false;
+                return;
+            }
+
+            Nav.NavigateTo("/stations");
+        }
+        catch
+        {
+            deleteError = "Unable to delete this station right now. Please try again.";
+            isDeleting = false;
+        }
+    }
+
+    double OccupancyPercent =>
+        station == null || station.bike_stands <= 0
+            ? 0
+            : (double)station.available_bikes / station.bike_stands * 100;
+
+    string StatusText =>
+        string.IsNullOrWhiteSpace(station?.status)
+            ? "Unknown"
+            : station.status!.ToUpperInvariant();
+
+    string StatusBadgeClass
+    {
+        get
+        {
+            if (station?.status == null)
+            {
+                return "badge bg-secondary";
+            }
+
+            if (station.status.Equals("OPEN", StringComparison.OrdinalIgnoreCase))
+            {
+                return "badge bg-success";
+            }
+
+            if (station.status.Equals("CLOSED", StringComparison.OrdinalIgnoreCase))
+            {
+                return "badge bg-danger";
+            }
+
+            return "badge bg-secondary";
+        }
+    }
+
+    string LastUpdateDisplay
+    {
+        get
+        {
+            if (DateTime.TryParse(station?.last_update_local, out var parsedLocal))
+            {
+                return parsedLocal.ToString("g");
+            }
+
+            if (station?.last_update > 0)
+            {
+                var epoch = DateTimeOffset.FromUnixTimeMilliseconds(station.last_update);
+                return epoch.LocalDateTime.ToString("g");
+            }
+
+            if (!string.IsNullOrWhiteSpace(station?.last_update_local))
+            {
+                return station!.last_update_local!;
+            }
+
+            return "Unknown";
+        }
     }
 }

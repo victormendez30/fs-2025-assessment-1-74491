@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace fs_2025_assessment_1_74491.Models;
+﻿namespace fs_2025_assessment_1_74491.Models;
 
 public class Station
 {

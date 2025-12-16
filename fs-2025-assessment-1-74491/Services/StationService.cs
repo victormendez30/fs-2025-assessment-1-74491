@@ -1,8 +1,5 @@
-﻿using System;
-using System.Text.Json;
-using System.Linq;
+﻿using System.Text.Json;
 using fs_2025_assessment_1_74491.Models;
-using Microsoft.AspNetCore.Hosting;
 
 namespace fs_2025_assessment_1_74491.Services;
 

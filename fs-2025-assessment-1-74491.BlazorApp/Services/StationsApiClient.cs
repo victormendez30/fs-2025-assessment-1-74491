@@ -1,5 +1,4 @@
-﻿using System.Net.Http.Json;
-using fs_2025_assessment_1_74491.BlazorApp.Models;
+﻿using fs_2025_assessment_1_74491.BlazorApp.Models;
 
 namespace fs_2025_assessment_1_74491.BlazorApp.Services
 {
@@ -75,6 +74,24 @@ namespace fs_2025_assessment_1_74491.BlazorApp.Services
             return await response.Content.ReadFromJsonAsync<StationDto>();
         }
 
-      
+        public async Task<bool> DeleteStationAsync(int number)
+        {
+            var response = await _http.DeleteAsync($"/api/v2/stations/{number}");
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+            {
+                return true;
+            }
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return false;
+            }
+
+            response.EnsureSuccessStatusCode();
+            return true;
+        }
+
+
     }
 }

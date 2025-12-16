@@ -6,15 +6,9 @@ a, .btn-link {
     color: #006bb7;
 }
 
-.btn-primary {
-    color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
+    .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+        box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    }
 
 .content {
     padding-top: 1.1rem;
@@ -43,9 +37,188 @@ h1:focus {
 }
 
     .blazor-error-boundary::after {
-        content: "An error has occurred."
+        content: "An error has occurred.";
     }
 
 .darker-border-checkbox.form-check-input {
     border-color: #929292;
+}
+
+:root {
+    --bike-green: #2ecc71;
+    --bike-dark: #1e1e1e;
+    --bike-light: #f8f9fa;
+    --bike-blue: #3498db;
+    --bike-orange: #f39c12;
+    --bike-red: #e74c3c;
+    --radius: 10px;
+    --shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+
+body {
+    background: linear-gradient(180deg, #e9fff5, #f9fdfb);
+    font-family: "Segoe UI", sans-serif;
+    color: var(--bike-dark);
+}
+
+h3, h4 {
+    font-weight: 600;
+}
+
+.card {
+    border: none;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.btn-primary {
+    background: var(--bike-blue);
+    border: none;
+    border-radius: var(--radius);
+    padding: 0.45rem 1.2rem;
+    font-weight: 600;
+    transition: 0.2s;
+    color: #fff;
+}
+
+    .btn-primary:hover {
+        background: #2d89c6;
+    }
+
+.btn-outline-secondary {
+    border-radius: var(--radius);
+    padding: 0.45rem 1.2rem;
+    font-weight: 500;
+    border-color: #ccc;
+}
+
+.btn-outline-danger {
+    border-radius: var(--radius);
+    padding: 0.45rem 1.2rem;
+    font-weight: 500;
+    border-color: var(--bike-red);
+    color: var(--bike-red);
+}
+
+    .btn-outline-danger:hover {
+        background: var(--bike-red);
+        color: white;
+    }
+
+.badge.bg-success {
+    background: var(--bike-green) !important;
+}
+
+.badge.bg-danger {
+    background: var(--bike-red) !important;
+}
+
+.table {
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+    .table thead {
+        background: white;
+        font-weight: 600;
+    }
+
+    .table tbody tr:hover {
+        background: #eef7ff;
+        transition: 0.2s;
+    }
+
+.filter-box {
+    background: white;
+    padding: 15px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+    .filter-box label {
+        font-size: 0.9rem;
+        color: #555;
+    }
+
+.summary-card {
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    background: white;
+    padding: 15px;
+    text-align: center;
+    transition: 0.2s;
+}
+
+    .summary-card:hover {
+        transform: translateY(-2px);
+    }
+
+.progress {
+    height: 14px;
+    border-radius: var(--radius);
+    background: #e6e6e6;
+}
+
+.progress-bar {
+    background: var(--bike-green);
+    border-radius: var(--radius);
+    transition: width 0.4s ease;
+}
+
+.form-control, .form-select {
+    border-radius: var(--radius);
+    box-shadow: none;
+    border-color: #ccc;
+}
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--bike-blue);
+    }
+
+a {
+    text-decoration: none;
+    color: var(--bike-blue);
+}
+
+    a:hover {
+        text-decoration: none;
+    }
+
+.station-link {
+    font-weight: 600;
+    color: var(--bike-blue);
+}
+
+    .station-link:hover {
+        color: var(--bike-green);
+    }
+
+.small-occupancy {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.small-occupancy-track {
+    flex: 1;
+    height: 8px;
+    border-radius: 999px;
+    background: #ececec;
+    overflow: hidden;
+}
+
+.small-occupancy-bar {
+    height: 100%;
+    background: var(--bike-green);
+}
+
+.small-occupancy-label {
+    font-size: 0.75rem;
+    min-width: 2.5rem;
+    text-align: right;
+}
+
+.nav-icon {
+    margin-right: 0.5rem;
+    font-size: 1.1rem;
 }

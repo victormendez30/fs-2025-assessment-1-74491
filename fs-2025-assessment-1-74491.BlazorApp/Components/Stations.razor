@@ -1,10 +1,66 @@
 ﻿@page "/stations"
+@rendermode InteractiveServer
 
-@inject Services.StationsApiClient Api
+@using fs_2025_assessment_1_74491.BlazorApp.Models
+@using fs_2025_assessment_1_74491.BlazorApp.Services
+
+@inject StationsApiClient Api
 
 <h3>Stations</h3>
 
-<div class="mb-3">
+<div class="mb-3 d-flex justify-content-between align-items-center">
+    <div></div>
+    <a class="btn btn-primary btn-sm" href="/stations/create">
+        New station
+    </a>
+</div>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMessage
+    </div>
+}
+
+@if (summary != null)
+{
+    <div class="row mb-3 g-2">
+        <div class="col-sm-6 col-md-3">
+            <div class="summary-card">
+                <div class="card-body">
+                    <div class="fw-semibold">Total stations</div>
+                    <div class="fs-4">@summary.totalStations</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="summary-card">
+                <div class="card-body">
+                    <div class="fw-semibold">Open stations</div>
+                    <div class="fs-4">@summary.openStations</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="summary-card">
+                <div class="card-body">
+                    <div class="fw-semibold">Closed stations</div>
+                    <div class="fs-4">@summary.closedStations</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="summary-card">
+                <div class="card-body">
+                    <div class="fw-semibold">Total bikes available</div>
+                    <div class="fs-4">@summary.totalAvailableBikes</div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="mb-3 filter-box">
     <div class="row g-2">
         <div class="col-md-3">
             <input class="form-control"
@@ -37,9 +93,15 @@
                 <option value="desc">Descending</option>
             </select>
         </div>
-        <div class="col-md-1 d-grid">
-            <button class="btn btn-primary" @onclick="ApplyFilters">Apply</button>
+        <div class="col-md-1 d-grid gap-1">
+            <button class="btn btn-primary" @onclick="ApplyFilters">
+                Apply
+            </button>
+            <button class="btn btn-outline-secondary" @onclick="ClearFilters">
+                Clear
+            </button>
         </div>
+
     </div>
 </div>
 
@@ -61,23 +123,37 @@ else
                 <th>Address</th>
                 <th>Bikes</th>
                 <th>Stands</th>
+                <th>Occupancy</th>
                 <th>Status</th>
             </tr>
         </thead>
         <tbody>
-        @foreach (var s in stations)
-        {
-            <tr>
-                <td>@s.number</td>
-                <td>
-                    <a href="/stations/@s.number">@s.name</a>
-                </td>
-                <td>@s.address</td>
-                <td>@s.available_bikes</td>
-                <td>@s.bike_stands</td>
-                <td>@s.status</td>
-            </tr>
-        }
+            @foreach (var s in stations)
+            {
+                <tr>
+                    <td>@s.number</td>
+                    <td>
+                        <a href="/stations/@s.number" class="station-link">@s.name</a>
+                    </td>
+                    <td>@s.address</td>
+                    <td>@s.available_bikes</td>
+                    <td>@s.bike_stands</td>
+                    <td>
+                        @{
+                            var percent = s.bike_stands > 0
+                            ? (int)Math.Round((double)s.available_bikes / s.bike_stands * 100) : 0;
+                        }
+                        <div class="small-occupancy">
+                            <div class="small-occupancy-track">
+                                <div class="small-occupancy-bar" style="width:@percent%"></div>
+                            </div>
+                            <span class="small-occupancy-label">@percent%</span>
+                        </div>
+                    </td>
+                    <td>@s.status</td>
+
+                </tr>
+            }
         </tbody>
     </table>
 
@@ -95,14 +171,17 @@ else
             </button>
         </div>
         <div>
-            Page @page
+            Page @currentPage
         </div>
     </div>
 }
 
 @code {
-    List<Models.StationDto>? stations;
+    List<StationDto>? stations;
+    StationSummaryDto? summary;
+
     bool isLoading;
+    string? errorMessage;
 
     string? statusFilter;
     int? minBikes;
@@ -110,47 +189,82 @@ else
     string? sortBy;
     string sortDir = "asc";
 
-    int page = 1;
+    int currentPage = 1;
     int pageSize = 20;
 
-    bool CanGoPrevious => page > 1;
+    bool CanGoPrevious => currentPage > 1;
     bool CanGoNext => stations != null && stations.Count == pageSize;
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadSummaryAsync();
         await LoadStationsAsync();
+    }
+
+    async Task LoadSummaryAsync()
+    {
+        try
+        {
+            summary = await Api.GetSummaryAsync();
+        }
+        catch
+        {
+            summary = null;
+        }
     }
 
     async Task LoadStationsAsync()
     {
         isLoading = true;
-        StateHasChanged();
+        errorMessage = null;
 
-        stations = await Api.GetStationsAsync(
-            status: statusFilter,
-            minBikes: minBikes,
-            search: searchTerm,
-            sortBy: sortBy,
-            sortDir: sortDir,
-            page: page,
-            pageSize: pageSize);
-
-        isLoading = false;
-        StateHasChanged();
+        try
+        {
+            stations = await Api.GetStationsAsync(
+                status: statusFilter,
+                minBikes: minBikes,
+                search: searchTerm,
+                sortBy: sortBy,
+                sortDir: sortDir,
+                page: currentPage,
+                pageSize: pageSize);
+        }
+        catch
+        {
+            stations = new List<StationDto>();
+            errorMessage = "Unable to load stations right now. Please try again.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
 
     async Task ApplyFilters()
     {
-        page = 1;
+        currentPage = 1;
         await LoadStationsAsync();
     }
+
+    async Task ClearFilters()
+    {
+        searchTerm = null;
+        statusFilter = null;
+        minBikes = null;
+        sortBy = null;
+        sortDir = "asc";
+        currentPage = 1;
+
+        await LoadStationsAsync();
+    }
+
 
     async Task NextPage()
     {
         if (!CanGoNext)
             return;
 
-        page++;
+        currentPage++;
         await LoadStationsAsync();
     }
 
@@ -159,7 +273,7 @@ else
         if (!CanGoPrevious)
             return;
 
-        page--;
+        currentPage--;
         await LoadStationsAsync();
     }
 }
